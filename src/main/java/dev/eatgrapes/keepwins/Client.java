@@ -3,10 +3,9 @@ package dev.eatgrapes.keepwins;
 import dev.eatgrapes.keepwins.event.EventBus;
 import dev.eatgrapes.keepwins.event.KeyboardListener;
 import dev.eatgrapes.keepwins.util.Logger;
-import dev.eatgrapes.keepwins.config.ConfigManager;
 import dev.eatgrapes.keepwins.ui.UiManager;
-import dev.eatgrapes.keepwins.util.render.nano.NanoLoader;
-import dev.eatgrapes.keepwins.util.render.nano.NanoUtil;
+import dev.eatgrapes.keepwins.util.data.ResourceLocation;
+import dev.eatgrapes.keepwins.ui.font.nano.NanoFontLoader;
 
 public class Client {
     public static final Client instance = new Client();
@@ -16,17 +15,16 @@ public class Client {
     public void init() {
         Logger.info("Initializing KeepWins");
 
-        
-        // 初始化UI管理器
+        ResourceLocation.getDirectory();
         UiManager.getInstance();
-
-        
-        // 注册事件监听器
         eventBus.register(keyboardListener, dev.eatgrapes.keepwins.event.type.SubscriberDepth.NONE);
+        
+        // 注意：字体初始化需要在OpenGL上下文准备好后进行
+        // 因此我们不在这里初始化字体，而是在第一次需要使用字体时进行初始化
         
         Logger.info("KeepWins initialized successfully");
     }
-    
+
     public EventBus getEventBus() {
         return eventBus;
     }

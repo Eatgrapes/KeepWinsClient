@@ -3,10 +3,10 @@ package dev.eatgrapes.keepwins.ui.gui.clickgui;
 import dev.eatgrapes.keepwins.ui.UiManager;
 import dev.eatgrapes.keepwins.util.render.nano.NanoUtil;
 import dev.eatgrapes.keepwins.util.Logger;
+import dev.eatgrapes.keepwins.ui.gui.clickgui.page.HomePage;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.util.ResourceLocation;
-import org.lwjgl.nanovg.NanoVG;
 
 import java.awt.*;
 import java.io.IOException;
@@ -36,6 +36,9 @@ public class ClickGUI extends GuiScreen {
         if (openTime == -1) {
             openTime = System.currentTimeMillis();
         }
+        
+        // 初始化侧边栏
+        Sidebar.init();
     }
 
     @Override
@@ -70,33 +73,28 @@ public class ClickGUI extends GuiScreen {
         // 应用缩放动画效果（使用缓动曲线）
         float scale = 0.5f + 0.5f * easedProgress;
         
-        // 绘制主窗口背景（改为白色）
+        // 绘制主窗口背景（比白色深一点点的颜色，只有右侧有圆角）
         nvgSave(vg);
         nvgTranslate(vg, screenWidth / 2f, screenHeight / 2f);
         nvgScale(vg, scale, scale);
         nvgTranslate(vg, -guiWidth / 2f, -guiHeight / 2f);
         
-        // 绘制圆角矩形（使用白色）
-        NanoUtil.beginPath();
-        nvgRoundedRect(vg, 0, 0, guiWidth, guiHeight, 15f);
-        NanoUtil.fillColor(new Color(255, 255, 255)); // 改为使用NanoUtil.fillColor方法
-        nvgFill(vg);
-        
-        // 绘制圆形logo（将x和y都改为10）
-        int logoSize = 40;
-        int logoX = 10; // 改为10
-        int logoY = 10; // 改为10
-        
         // 加载或获取缓存的Logo图像
         loadLogoImage();
+        // 将logoImageId传递给侧边栏
+        Sidebar.setLogoImageId(logoImageId);
         
-        if (logoImageId != -1 && logoImageId != 0) {
-            // 使用圆形绘制方法
-            NanoUtil.drawImageCircle(logoImageId, logoX + logoSize/2f, logoY + logoSize/2f, logoSize/2f);
-        } else {
-            // 加载失败则绘制一个简单的圆形占位符
-            NanoUtil.drawCircle(logoX + logoSize/2f, logoY + logoSize/2f, logoSize/2f, new Color(100, 100, 100));
-        }
+        // 绘制侧边栏
+        Sidebar.render(0, 0, guiHeight);
+        
+        // 绘制主内容区域背景（比白色深一点点，只有右侧有圆角）
+        NanoUtil.beginPath();
+        nvgRoundedRectVarying(vg, Sidebar.getWidth(), 0, guiWidth - Sidebar.getWidth(), guiHeight, 0f, 15f, 15f, 0f); // 左上0f，右上15f，右下15f，左下0f
+        NanoUtil.fillColor(new Color(245, 245, 245)); // 比白色深一点点的颜色
+        nvgFill(vg);
+        
+        // 渲染当前页面内容
+        HomePage.render(Sidebar.getWidth(), 0, guiWidth - Sidebar.getWidth(), guiHeight);
         
         nvgRestore(vg);
         
@@ -104,6 +102,22 @@ public class ClickGUI extends GuiScreen {
         NanoUtil.endFrame();
         
         super.drawScreen(mouseX, mouseY, partialTicks);
+    }
+    
+    @Override
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+        
+        // 将鼠标点击事件传递给侧边栏按钮
+        Sidebar.onMouseClick(mouseX, mouseY, mouseButton);
+    }
+    
+    @Override
+    protected void mouseReleased(int mouseX, int mouseY, int state) {
+        super.mouseReleased(mouseX, mouseY, state);
+        
+        // 将鼠标移动事件传递给侧边栏按钮
+        Sidebar.onMouseMove(mouseX, mouseY);
     }
     
     /**

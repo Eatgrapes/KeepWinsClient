@@ -10,26 +10,25 @@ import java.util.List;
 public class NanoFontLoader {
     public static List<NanoFontRenderer> renderers = new ArrayList<>();
     public static NanoFontRenderer misans;
-    public static NanoFontRenderer emoji;
-    public static NanoFontRenderer script;
-    public static NanoFontRenderer rubik;
-    public static NanoFontRenderer greyCliff;
-    public static NanoFontRenderer monster;
+    
+    private static boolean initialized = false;
 
     public static void registerFonts() {
-        misans = new NanoFontRenderer("MiSans", "misans");
-        emoji = new NanoFontRenderer("Emoji", "emoji");
-        script = new NanoFontRenderer("Script", "script");
-        rubik = new NanoFontRenderer("Rubik", "rubik");
-        greyCliff = new NanoFontRenderer("Greycliff", "greycliff");
-        monster = new NanoFontRenderer("Monster", "monster");
+        // 延迟初始化，确保只初始化一次
+        if (initialized) {
+            return;
+        }
+        
+        try {
+            misans = new NanoFontRenderer("MiSans", "misans");
 
-        renderers.add(misans);
-        renderers.add(emoji);
-        renderers.add(script);
-        renderers.add(rubik);
-        renderers.add(greyCliff);
-        renderers.add(monster);
+            renderers.add(misans);
+            
+            initialized = true;
+        } catch (Exception e) {
+            System.err.println("Failed to initialize fonts: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public static String[] getRenderers() {
