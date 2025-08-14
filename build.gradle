@@ -1,0 +1,77 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group = 'dev.eatgrapes.keepwins'
+version = '1.0-SNAPSHOT'
+
+project.ext.lwjglVersion = "3.3.4"
+project.ext.lwjglNatives = "natives-windows"
+
+repositories {
+    mavenCentral()
+
+    maven {
+        name "Velocity"
+        url "https://nexus.velocitypowered.com/repository/maven-public/"
+    }
+
+    maven {
+        url "https://jitpack.io"
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", includes: ["*.jar"])
+
+    implementation 'com.typesafe.akka:akka-actor_2.11:2.4.11.2'
+    implementation 'com.paulscode:codecjorbis:20101023'
+    implementation 'com.paulscode:codecwav:20101023'
+    implementation 'commons-codec:commons-codec:1.13'
+    implementation 'org.apache.commons:commons-compress:1.26.0'
+    implementation 'commons-io:commons-io:2.16.1'
+    implementation 'org.apache.commons:commons-lang3:3.18.0'
+    implementation 'commons-logging:commons-logging:1.1.3'
+    implementation 'com.google.guava:guava:17.0'
+    implementation 'com.ibm.icu:icu4j-core-mojang:51.2'
+    implementation 'net.sf.jopt-simple:jopt-simple:4.6'
+    implementation 'com.paulscode:libraryjavasound:20101123'
+    implementation 'org.apache.logging.log4j:log4j-api:2.0-beta9'
+    implementation 'org.apache.logging.log4j:log4j-core:2.0-beta9'
+    implementation 'com.paulscode:soundsystem:20120107'
+    implementation 'net.sf.trove4j:trove4j:3.0.3'
+    implementation 'javax.vecmath:vecmath:1.5.2'
+    implementation 'com.mojang:authlib:1.5.21'
+    implementation 'io.netty:netty-all:4.0.23.Final'
+    implementation 'com.mojang:netty:1.8.8'
+    implementation 'com.paulscode:libraryjavasound:20101123'
+
+    implementation "org.lwjgl:lwjgl-nanovg:3.3.4"
+    runtimeOnly "org.lwjgl:lwjgl-nanovg::$lwjglNatives"
+
+}
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+shadowJar {
+    archiveBaseName.set("Minecraft")
+    archiveClassifier.set("")
+    archiveVersion.set("")
+    manifest {
+        attributes(
+                'Main-Class': 'net.minecraft.client.main.Main',
+                'Multi-Release': 'true'
+        )
+    }
+    mergeServiceFiles()
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+build.dependsOn shadowJar
