@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.authlib.properties.PropertyMap.Serializer;
+import dev.eatgrapes.keepwins.util.CacheCleaner;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -93,6 +94,8 @@ public class Main {
         Runtime.getRuntime().addShutdownHook(new Thread("Client Shutdown Thread") {
             public void run() {
                 Minecraft.stopIntegratedServer();
+                // 添加缓存清理功能
+                CacheCleaner.cleanCache();
             }
         });
         Thread.currentThread().setName("Client thread");

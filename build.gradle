@@ -47,7 +47,6 @@ dependencies {
     implementation 'com.mojang:netty:1.8.8'
     implementation 'com.paulscode:libraryjavasound:20101123'
 
-    // 添加Apache Batik依赖以支持SVG渲染
     implementation 'org.apache.xmlgraphics:batik-all:1.17'
     
     implementation "org.lwjgl:lwjgl-nanovg:3.3.4"
@@ -78,6 +77,37 @@ shadowJar {
     }
     mergeServiceFiles()
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// shit task
+task supershadowjar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+    archiveBaseName.set("Minecraft")
+    archiveClassifier.set("full")
+    archiveVersion.set("")
+
+    from sourceSets.main.output
+
+    configurations = [project.configurations.runtimeClasspath]
+
+    from(fileTree(dir: "libs", includes: ["*.jar"])) {
+        into "META-INF/jars"
+    }
+    
+    manifest {
+        attributes(
+                'Main-Class': 'net.minecraft.client.main.Main',
+                'Multi-Release': 'true'
+        )
+    }
+    
+    mergeServiceFiles()
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+task buildFullJar(type: Exec) {
+    dependsOn supershadowjar
+    workingDir '.'
+    commandLine 'cmd', '/c', 'gradlew.bat', 'supershadowjar'
 }
 
 build.dependsOn shadowJar
