@@ -17,7 +17,7 @@ public class Icon {
     private static final Minecraft mc = Minecraft.getMinecraft();
     
     /**
-     * 从assets/minecraft/KeepWins/icon文件夹加载图标
+     * 从assets/minecraft/KeepWins/icon文件夹加载图标（支持SVG和PNG格式）
      * @param iconPath 图标路径（包含扩展名）
      * @return 图标ID，可用于渲染
      */
@@ -42,7 +42,16 @@ public class Icon {
             }
             
             InputStream inputStream = mc.getResourceManager().getResource(resourceLocation).getInputStream();
-            int iconId = NanoUtil.genImageId(inputStream);
+            
+            int iconId;
+            // 检查是否为SVG文件
+            if (iconPath.toLowerCase().endsWith(".svg")) {
+                // 处理SVG文件
+                iconId = loadSvgIcon(inputStream);
+            } else {
+                // 处理其他图像格式（PNG等）
+                iconId = NanoUtil.genImageId(inputStream);
+            }
             
             // 缓存图标ID
             iconCache.put(iconPath, iconId);
@@ -58,6 +67,38 @@ public class Icon {
             // 加载失败
             e.printStackTrace();
             return -1; // 返回-1表示加载失败
+        }
+    }
+    
+    /**
+     * 加载并渲染SVG图标
+     * @param inputStream SVG文件输入流
+     * @return 图标ID，可用于渲染
+     */
+    private static int loadSvgIcon(InputStream inputStream) {
+        try {
+            // 使用Apache Batik库的Transcoder API来渲染SVG到BufferedImage
+            org.apache.batik.transcoder.TranscoderInput input = new org.apache.batik.transcoder.TranscoderInput(inputStream);
+            
+            // 创建BufferedImageTranscoder来将SVG转换为BufferedImage
+            BufferedImageTranscoder transcoder = new BufferedImageTranscoder();
+            
+            // 设置默认大小
+            transcoder.addTranscodingHint(org.apache.batik.transcoder.image.ImageTranscoder.KEY_WIDTH, 64f);
+            transcoder.addTranscodingHint(org.apache.batik.transcoder.image.ImageTranscoder.KEY_HEIGHT, 64f);
+            
+            // 执行转换
+            org.apache.batik.transcoder.TranscoderOutput output = new org.apache.batik.transcoder.TranscoderOutput();
+            transcoder.transcode(input, output);
+            
+            // 获取结果图像
+            java.awt.image.BufferedImage bufferedImage = transcoder.getImage();
+            
+            // 使用NanoUtil将BufferedImage转换为纹理ID
+            return NanoUtil.genImageId(bufferedImage);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
         }
     }
     
@@ -116,5 +157,26 @@ public class Icon {
         
         // 清空缓存
         iconCache.clear();
+    }
+    
+    /**
+     * 内部类：用于将SVG转换为BufferedImage的Transcoder
+     */
+    private static class BufferedImageTranscoder extends org.apache.batik.transcoder.image.ImageTranscoder {
+        private java.awt.image.BufferedImage image = null;
+        
+        @Override
+        public java.awt.image.BufferedImage createImage(int w, int h) {
+            return new java.awt.image.BufferedImage(w, h, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+        }
+        
+        @Override
+        public void writeImage(java.awt.image.BufferedImage img, org.apache.batik.transcoder.TranscoderOutput output) {
+            this.image = img;
+        }
+        
+        public java.awt.image.BufferedImage getImage() {
+            return image;
+        }
     }
 }

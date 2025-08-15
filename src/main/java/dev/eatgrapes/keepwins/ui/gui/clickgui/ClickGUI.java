@@ -20,7 +20,7 @@ public class ClickGUI extends GuiScreen {
     private long openTime = -1;
     private boolean closing = false;
     private long closeTime = -1;
-    private static final long ANIMATION_DURATION = 300; // 增加动画持续时间到300毫秒
+    private static final long ANIMATION_DURATION = 400; // 增加动画持续时间到400毫秒，稍微减慢动画速度
     private static final ResourceLocation LOGO_LOCATION = new ResourceLocation("KeepWins/logo.png");
     
     // 缓存图像ID以避免重复加载
@@ -65,6 +65,9 @@ public class ClickGUI extends GuiScreen {
         // 应用缓动曲线 (easeOutQuart)
         float easedProgress = 1 - (float) Math.pow(1 - animationProgress, 4);
         
+        // 计算透明度，用于渐隐效果
+        float alpha = easingFunction(animationProgress);
+        
         // 获取屏幕分辨率并计算自适应大小
         ScaledResolution sr = new ScaledResolution(mc);
         int screenWidth = sr.getScaledWidth();
@@ -89,6 +92,9 @@ public class ClickGUI extends GuiScreen {
         nvgScale(vg, scale, scale);
         nvgTranslate(vg, -guiWidth / 2f, -guiHeight / 2f);
         
+        // 设置透明度
+        nvgGlobalAlpha(vg, alpha);
+        
         // 加载或获取缓存的Logo图像
         loadLogoImage();
         // 将logoImageId传递给侧边栏
@@ -100,7 +106,7 @@ public class ClickGUI extends GuiScreen {
         // 绘制主内容区域背景（比白色深一点点，只有右侧有圆角）
         NanoUtil.beginPath();
         nvgRoundedRectVarying(vg, Sidebar.getWidth(), 0, guiWidth - Sidebar.getWidth(), guiHeight, 0f, 15f, 15f, 0f); // 左上0f，右上15f，右下15f，左下0f
-        NanoUtil.fillColor(new Color(245, 245, 245)); // 比白色深一点点的颜色
+        NanoUtil.fillColor(new Color(245, 245, 245, (int) (alpha * 255))); // 比白色深一点点的颜色，并应用透明度
         nvgFill(vg);
         
         // 渲染当前页面内容
@@ -175,7 +181,8 @@ public class ClickGUI extends GuiScreen {
 
     @Override
     protected void keyTyped(char typedChar, int keyCode) throws IOException {
-        super.keyTyped(typedChar, keyCode);
+        // 修复：不要直接调用super.keyTyped，这会中断关闭动画
+        // super.keyTyped(typedChar, keyCode);
         if (keyCode == 1) { // ESC键
             close();
         }
@@ -205,6 +212,22 @@ public class ClickGUI extends GuiScreen {
         // 不要删除图像，因为它们可能被其他地方使用
         // 只是重置引用
         logoImageId = -1;
+    }
+    
+    /**
+     * 应用缓动函数计算透明度
+     * @param progress 动画进度 (0.0f to 1.0f)
+     * @return 透明度值 (0.0f to 1.0f)
+     */
+    private float easingFunction(float progress) {
+        // 使用easeOutCubic缓动函数计算透明度
+        // 打开时: 从0到1
+        // 关闭时: 从1到0
+        if (closing) {
+            return (float) (1.0f - Math.pow(1 - progress, 3));
+        } else {
+            return (float) (1.0f - Math.pow(1 - progress, 3));
+        }
     }
     
     @Override

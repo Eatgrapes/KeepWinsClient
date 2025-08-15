@@ -147,6 +147,10 @@ public class NanoUtil extends MinecraftInstance {
     public static int genImageId(BufferedImage image) {
         File cacheFile = new File(ConfigManager.cacheDir, ThreadLocalRandom.current().nextFloat() + ".png");
         try {
+            // 确保缓存目录存在
+            if (!ConfigManager.cacheDir.exists()) {
+                ConfigManager.cacheDir.mkdirs();
+            }
             ImageIO.write(image, "png", cacheFile);
         } catch (IOException e) {
             throw new RuntimeException(e);

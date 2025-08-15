@@ -16,7 +16,7 @@ public class Sidebar {
     public static void init() {
         // 初始化主页按钮，调整大小为30x30，位置为(15, 70)
         homeButton = new ButtonAPI(15, 70, 30, 30)
-                .setIconPath("home.png")
+                .setIconPath("home.svg")
                 .setBackgroundColor(new Color(245, 245, 245)) // 比白色深一点点
                 .setHoverColor(new Color(245, 245, 245)) // 悬停时颜色不变
                 .setBorderColor(new Color(245, 245, 245)) // 边框颜色与背景一致

@@ -47,6 +47,9 @@ dependencies {
     implementation 'com.mojang:netty:1.8.8'
     implementation 'com.paulscode:libraryjavasound:20101123'
 
+    // 添加Apache Batik依赖以支持SVG渲染
+    implementation 'org.apache.xmlgraphics:batik-all:1.17'
+    
     implementation "org.lwjgl:lwjgl-nanovg:3.3.4"
     runtimeOnly "org.lwjgl:lwjgl-nanovg::$lwjglNatives"
 
