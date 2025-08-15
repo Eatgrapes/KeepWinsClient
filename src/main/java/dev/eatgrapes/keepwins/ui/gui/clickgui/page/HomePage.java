@@ -13,12 +13,9 @@ import static org.lwjgl.nanovg.NanoVG.*;
 public class HomePage {
     
     public static void render(int guiX, int guiY, int guiWidth, int guiHeight) {
-        // 确保字体已初始化
         NanoFontLoader.registerFonts();
-        
-        // 检查Nano字体是否可用
+
         if (NanoFontLoader.misans != null) {
-            // 使用NanoVG渲染"home"文字，使用Misans字体
             NanoFontLoader.misans.drawString(
                     "home", 
                     guiX + guiWidth / 2.0f, 
@@ -28,7 +25,6 @@ public class HomePage {
                     Color.BLACK
             );
         } else {
-            // 如果Nano字体不可用，使用Minecraft默认字体
             FontRenderer fontRenderer = Minecraft.getMinecraft().fontRendererObj;
             String text = "home";
             int textWidth = fontRenderer.getStringWidth(text);

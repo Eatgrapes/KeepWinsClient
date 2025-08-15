@@ -54,6 +54,14 @@ public class ClickGUI extends GuiScreen {
         // 计算动画插值
         float animationProgress = getAnimationProgress();
         
+        // 如果关闭动画已完成，则关闭界面
+        if (closing && animationProgress <= 0) {
+            NanoUtil.endFrame();
+            mc.displayGuiScreen(null);
+            UiManager.getInstance().setClickGuiOpen(false);
+            return;
+        }
+        
         // 应用缓动曲线 (easeOutQuart)
         float easedProgress = 1 - (float) Math.pow(1 - animationProgress, 4);
         
@@ -71,7 +79,9 @@ public class ClickGUI extends GuiScreen {
         int guiY = (screenHeight - guiHeight) / 2;
         
         // 应用缩放动画效果（使用缓动曲线）
-        float scale = 0.5f + 0.5f * easedProgress;
+        // 打开时：从小到大 (0.5f to 1.0f)
+        // 关闭时：从大到小 (1.0f to 0.5f)
+        float scale = closing ? (1.0f - 0.5f * (1.0f - easedProgress)) : (0.5f + 0.5f * easedProgress);
         
         // 绘制主窗口背景（比白色深一点点的颜色，只有右侧有圆角）
         nvgSave(vg);
@@ -153,15 +163,6 @@ public class ClickGUI extends GuiScreen {
             }
             long elapsed = System.currentTimeMillis() - closeTime;
             float progress = 1.0f - Math.min(1.0f, (float) elapsed / ANIMATION_DURATION);
-            if (progress <= 0) {
-                Logger.info("ClickGUI closed");
-                // 添加一个标志确保只执行一次关闭操作
-                if (mc.currentScreen == this) {
-                    mc.displayGuiScreen(null);
-                    UiManager.getInstance().setClickGuiOpen(false);
-                }
-                return 0.0f;
-            }
             return Math.max(0, progress); // 确保不会返回负数
         } else {
             if (openTime == -1) {

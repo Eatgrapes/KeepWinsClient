@@ -50,6 +50,9 @@ dependencies {
     implementation "org.lwjgl:lwjgl-nanovg:3.3.4"
     runtimeOnly "org.lwjgl:lwjgl-nanovg::$lwjglNatives"
 
+    implementation 'org.lwjgl:lwjgl-stb:3.3.4'
+    runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
+
 }
 
 test {
